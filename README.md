@@ -1,8 +1,8 @@
-# Haikus by Joey
+# 🩴 - Haikus by Joey
 
 This is a demonstration of Southern Cross AI's large language model JoeyLLM.  Specifically, this demonstration allows you ask JoeyLLM to write you a haiku of your choosing.
 
-## Basic Setup (from Vercel)
+## Basic Setup (from Vercel) 🌿
 
 First, run the development server:
 
@@ -18,7 +18,7 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## How to Use
+## How to Use 🦘
 
 Enter a prompt of your choosing in the following window:
 
@@ -34,7 +34,7 @@ You can also click the text below to copy your new haiku:
 
 <img width="326" height="40" alt="image" src="https://github.com/user-attachments/assets/473f4865-6d17-4222-9311-4ac4ef24c2b4" />
 
-## What is the purpose of this?
+## What is the purpose of this? 💥
 
 This demonstration showcases how JoeyLLM can be prompt-engineered to reach a certain objective, and how successful it is in filling said objective.  This was also just for fun because I like haikus.
 
