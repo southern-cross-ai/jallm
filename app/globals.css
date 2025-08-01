@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Style+Script&display=swap');
 
 :root {
   --background: #ffffff;
@@ -11,8 +12,6 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Style+Script&display=swap');
 
 .font-cedarville {
   font-family: "Cedarville Cursive", cursive;
