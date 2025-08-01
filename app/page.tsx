@@ -52,18 +52,20 @@ export default function HaikuGenerator() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+          <h1 className="text-4xl font-bold text-gray-800" style={{ fontFamily: "'Cedarville Cursive', serif" }}>
             Haikus by Joey ~ 🩴
           </h1>
           <p className="text-gray-600">
             <br></br>
-            Have you ever wondered how a stereotypical Australian would write a haiku?
+            G'day... 
             <br></br>
-            Probably not.  But, this demonstration now exists.  It will show you how.
+            Ya ever wonder how a stereotypical Australian would write a haiku?
+            <br></br>
+            Prolly not.  But, this demo exists now.  It's here to will show ya how.
             <br></br><br></br>
-            Just enter a prompt into the window below and let JoeyLLM inspire you~
+            Enter ya prompt into the window below and let JoeyLLM inspire ya~
             <br></br>
-            <i>( actual haiku not guaranteed :[ )</i>
+            <i>( actual haiku not guaranteed )</i>
           </p>
         </div>
 
@@ -112,7 +114,7 @@ export default function HaikuGenerator() {
               Your (Ripper) Haiku
             </h2>
             <div className="bg-gray-50 rounded-md p-6 text-center">
-              <div className="text-lg text-gray-800 leading-relaxed font-medium font-cedarville">
+              <div className="text-lg text-gray-800 leading-relaxed font-medium" style={{ fontFamily: "'Cedarville Cursive', serif" }}>
                 {haiku.split('\n').map((line, index) => (
                   <div key={index} className="mb-2 last:mb-0">
                     {line}
