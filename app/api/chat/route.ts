@@ -3,42 +3,42 @@ import OpenAI from 'openai';
 
 // Initialize your custom OpenAI client
 const client = new OpenAI({
-  baseURL: "http://???/v1",
+  baseURL: "http://13.239.88.166:8000/v1",
   apiKey: "EMPTY"
 });
 
-// Store chat history in memory (in production, use a database)
-let chatHistory: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
-  { role: "system", content: "You are JoeyLLM, an assistant developed by Southern Cross AI." }
-];
-
 export async function POST(request: NextRequest) {
   try {
-    const { query, resetHistory } = await request.json();
+    const { prompt } = await request.json();
 
-    // Reset chat history if requested
-    if (resetHistory) {
-      chatHistory = [
-        { role: "system", content: "You are JoeyLLM, an assistant developed by Southern Cross AI." }
-      ];
-      return NextResponse.json({ result: "Chat history reset." });
-    }
-
-    if (!query || typeof query !== 'string') {
+    if (!prompt || typeof prompt !== 'string') {
       return NextResponse.json(
-        { error: 'Query is required and must be a string' },
+        { error: 'Prompt is required and must be a string' },
         { status: 400 }
       );
     }
 
-    // Add user message to history
-    chatHistory.push({ role: "user", content: query });
+    // Construct the haiku generation prompt
+    const haikuPrompt = `Write a haiku (5-7-5 syllable pattern) based on this prompt: "${prompt}". 
+
+Please only respond with the haiku, with appropriate line breaks between each line.  Do not add in any commentary about it, including the line number or syllable count.
+
+Please ensure that there are three lines, one with 5 syllables, another with 7 syllables, and one with 5 syllables again (all in that order).
+
+At least once, add a random exclamation that is Australian slang or a cultural reference at the end of a line in parentheses (e.g. "Roses are red (crikey!)").  Do not swear.`;
+
+    // Create a focused conversation for haiku generation
+    const messages = [
+      { role: "system" as const, content: "You are an expert at writing eloquent and poetic 3-line haikus that strictly follow the 5-7-5 syllable pattern. You also talk like a stereotypical Australian." },
+      { role: "user" as const, content: haikuPrompt }
+    ];
 
     // Create streaming response
     const stream = await client.chat.completions.create({
       model: "Joey",
-      messages: chatHistory,
+      messages: messages,
       stream: true,
+      temperature: 0.8, // Higher temperature for more creative haikus
     });
 
     let responseText = "";
@@ -51,35 +51,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Add assistant response to history
-    chatHistory.push({ role: "assistant", content: responseText });
+    // Clean up the response and ensure proper formatting
+    const haiku = responseText.trim();
 
-    return NextResponse.json({ 
-      result: responseText,
-      historyLength: chatHistory.length 
-    });
+    return NextResponse.json({ haiku });
 
   } catch (error: any) {
-    console.error('Chat API Error:', error);
+    console.error('Error generating haiku:', error);
     return NextResponse.json(
-      { error: 'Failed to get response from LLM: ' + error.message },
+      { error: 'Failed to generate haiku: ' + error.message },
       { status: 500 }
     );
   }
-}
-
-// Optional: Add a GET endpoint to retrieve chat history
-export async function GET() {
-  return NextResponse.json({ 
-    history: chatHistory,
-    length: chatHistory.length 
-  });
-}
-
-// Optional: Add a DELETE endpoint to clear chat history
-export async function DELETE() {
-  chatHistory = [
-    { role: "system", content: "You are JoeyLLM, an assistant developed by Southern Cross AI." }
-  ];
-  return NextResponse.json({ result: "Chat history cleared." });
 }
