@@ -1,291 +1,138 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import styles from './page.module.css';
+import { useState } from 'react';
 
-interface Message {
-  id: number;
-  text: string;
-  isUser: boolean;
-}
+export default function HaikuGenerator() {
+  const [prompt, setPrompt] = useState('');
+  const [haiku, setHaiku] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [query, setQuery] = useState('');
-  const [isDark, setIsDark] = useState(false);
-  const [droppedFile, setDroppedFile] = useState<File | null>(null);
-  const [uploadInProgress, setUploadInProgress] = useState(false);
-  const [websearchEnabled, setWebsearchEnabled] = useState(true);
-  const [rating, setRating] = useState(0);
-  const [chatHistory, setChatHistory] = useState('');
-  const [dragboxText, setDragboxText] = useState('DRAG or DROP');
-  
-  const chatboxRef = useRef<HTMLDivElement>(null);
-  const dragboxRef = useRef<HTMLDivElement>(null);
-
-  // Theme toggle
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-  };
-
-  // Scroll to bottom of chat
-  const scrollToBottom = () => {
-    if (chatboxRef.current) {
-      chatboxRef.current.scrollTop = chatboxRef.current.scrollHeight;
-    }
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  // Drag and drop handlers
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (dragboxRef.current) {
-      dragboxRef.current.style.border = isDark ? "2px dashed #88aacc" : "2px dashed #66cc88";
-      dragboxRef.current.style.backgroundColor = isDark ? "#333944" : "#f0fff0";
-    }
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (dragboxRef.current) {
-      dragboxRef.current.style.border = "2px dashed #ccc";
-      dragboxRef.current.style.backgroundColor = "";
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (dragboxRef.current) {
-      dragboxRef.current.style.border = "2px dashed #ccc";
-      dragboxRef.current.style.backgroundColor = "";
-    }
-    
-    const files = e.dataTransfer.files;
-    if (files.length > 0 && files[0].type === "application/pdf") {
-      setDroppedFile(files[0]);
-      setDragboxText(`Selected: ${files[0].name}`);
-    }
-  };
-
-  // PDF upload
-  const uploadPDF = async () => {
-    if (uploadInProgress) {
-      setDragboxText("⏳ Upload already in progress...");
+  const generateHaiku = async () => {
+    if (!prompt.trim()) {
+      setError('Please enter a prompt');
       return;
     }
 
-    if (!droppedFile) {
-      setDragboxText("⚠️ Please select a PDF first.");
-      return;
-    }
-
-    setUploadInProgress(true);
-    const formData = new FormData();
-    formData.append("file", droppedFile);
-    setDragboxText("📤 Uploading PDF...");
+    setLoading(true);
+    setError('');
+    setHaiku('');
 
     try {
-      const res = await fetch("http://localhost:7860/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      setDragboxText("✅ PDF uploaded: " + data.result);
-    } catch (err) {
-      setDragboxText("❌ Upload failed: " + (err as Error).message);
-    } finally {
-      setUploadInProgress(false);
-    }
-  };
-
-  // Chat functionality
-  const ask = async () => {
-    if (uploadInProgress) {
-      alert("📄 PDF is still being processed. Please wait.");
-      return;
-    }
-
-    const trimmedQuery = query.trim();
-    if (!trimmedQuery) return;
-
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now(),
-      text: trimmedQuery,
-      isUser: true
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setQuery('');
-
-    // Add thinking placeholder
-    const thinkingMessage: Message = {
-      id: Date.now() + 1,
-      text: '⏳ Thinking...',
-      isUser: false
-    };
-
-    setMessages(prev => [...prev, thinkingMessage]);
-
-    try {
-      const res = await fetch('/api/chat', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: trimmedQuery })
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
       });
 
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+      if (!response.ok) {
+        throw new Error('Failed to generate haiku');
       }
 
-      const data = await res.json();
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      const botResponse = data.result;
-
-      // Update the thinking message with actual response
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === thinkingMessage.id 
-            ? { ...msg, text: botResponse }
-            : msg
-        )
-      );
-
-      // Update chat history
-      setChatHistory(prev => prev + `You: ${trimmedQuery}\nJoeyLLM: ${botResponse}\n\n`);
-
+      const data = await response.json();
+      setHaiku(data.haiku);
     } catch (err) {
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === thinkingMessage.id 
-            ? { ...msg, text: '❌ Error: ' + (err as Error).message }
-            : msg
-        )
-      );
+      setError('Error generating haiku. Please try again.');
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      ask();
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      generateHaiku();
     }
   };
 
   return (
-    <div className={`${styles.body} ${isDark ? styles.dark : ''}`}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerContent}>
-          <span className={styles.headerTitle}><b>Modelworks</b></span>
-          <img src="https://i.imgur.com/tHtVPF4.png" alt="Modelworks logo" className={styles.logo} />
-          <span className={styles.headerSubtitle}>Chat with an LLM</span>
-        </div>
-        <div className={styles.headerRight}>
-          <button 
-            id="theme-toggle" 
-            className={styles.themeToggle}
-            onClick={toggleTheme}
-          >
-            {isDark ? '🌔' : '🌒'}
-          </button>
-        </div>
-      </div>
-
-      {/* Main Container */}
-      <div className={styles.container}>
-        {/* Left Column - Chat History */}
-        <div className={styles.column}>
-          <h3><b>Chat History</b></h3>
-          <pre className={styles.history}>{chatHistory}</pre>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
+      <div className="max-w-2xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+            Haikus by Joey ~ 🩴
+          </h1>
+          <p className="text-gray-600">
+            <br></br>
+            Have you ever wondered how a stereotypical Australian would write a haiku?
+            <br></br>
+            Probably not.  But, this demonstration now exists.  It will show you how.
+            <br></br><br></br>
+            Just enter a prompt into the window below and let JoeyLLM inspire you~
+            <br></br>
+            <i>( actual haiku not guaranteed :[ )</i>
+          </p>
         </div>
 
-        {/* Center Column - Chat */}
-        <div className={styles.column}>
-          <h3><b>MODEL:</b> JoeyLLM (Southern Cross AI)</h3>
-          <div className={styles.chatbox} ref={chatboxRef}>
-            {messages.map((message) => (
-              <div 
-                key={message.id} 
-                className={`${styles.message} ${message.isUser ? styles.user : styles.bot}`}
-              >
-                {message.text}
-              </div>
-            ))}
-          </div>
-          <div className={styles.inputGroup}>
-            <input
-              id="query"
-              className={styles.queryInput}
-              placeholder="Your question..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyPress={handleKeyPress}
-            />
-            <button type="button" onClick={ask} className={styles.sendButton}>
-              Send
-            </button>
-          </div>
-        </div>
-
-        {/* Right Column - Upload & Settings */}
-        <div className={styles.column}>
-          <h3><b>Upload a PDF</b></h3>
-          <div 
-            className={styles.dragbox}
-            ref={dragboxRef}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            {dragboxText}
-          </div>
-          <div className={styles.display}>
-            <button 
-              id="rag" 
-              type="button" 
-              onClick={uploadPDF}
-              className={styles.submitButton}
-            >
-              Submit
-            </button>
-          </div>
-          
-          <br /><br />
-          <h3><b>Websearch Mode</b></h3>
-          <div className={styles.display}>
-            <label>
-              <input 
-                type="checkbox" 
-                checked={websearchEnabled}
-                onChange={(e) => setWebsearchEnabled(e.target.checked)}
-              />
-              {' '}ON
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <div className="mb-4">
+            <label htmlFor="prompt" className="block text-sm font-medium text-gray-700 mb-2">
+              Your Prompt
             </label>
-          </div>
-          
-          <br /><br />
-          <h3><b>Rate Your Experience</b></h3>
-          <div className={styles.display}>
-            <input 
-              type="range" 
-              min="0" 
-              max="5" 
-              value={rating}
-              onChange={(e) => setRating(Number(e.target.value))}
+            <textarea
+              id="prompt"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Enter a theme, mood, or scene for your haiku..."
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 text-gray-700 focus:ring-indigo-500 focus:border-transparent resize-none"
+              rows={3}
+              disabled={loading}
             />
           </div>
-        </div>
-      </div>
 
-      {/* Footer */}
-      <p className={styles.footer}>Modelworks © 2025</p>
+          <button
+            onClick={generateHaiku}
+            disabled={loading || !prompt.trim()}
+            className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+          >
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                Generating...
+              </div>
+            ) : (
+              'Generate Haiku'
+            )}
+          </button>
+
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          )}
+        </div>
+
+        {haiku && (
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+              Your (Ripper) Haiku
+            </h2>
+            <div className="bg-gray-50 rounded-md p-6 text-center">
+              <div className="text-lg text-gray-800 leading-relaxed font-medium font-cedarville">
+                {haiku.split('\n').map((line, index) => (
+                  <div key={index} className="mb-2 last:mb-0">
+                    {line}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(haiku);
+                }}
+                className="text-indigo-600 hover:text-indigo-800 text-sm font-medium" id="copybutton"
+              >
+                Top-notch poem? 📋 Copy to clipboard!
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
