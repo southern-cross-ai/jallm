@@ -12,6 +12,12 @@
   --font-mono: var(--font-geist-mono);
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Style+Script&display=swap');
+
+.font-cedarville {
+  font-family: "Cedarville Cursive", cursive;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
