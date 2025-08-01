@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 
 // Initialize your custom OpenAI client
 const client = new OpenAI({
-  baseURL: "http://13.239.88.166:8000/v1",
+  baseURL: "http://???/v1",
   apiKey: "EMPTY"
 });
 
