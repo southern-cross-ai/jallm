@@ -16,7 +16,7 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) (or an alternative, which is stated once you run these commands) with your browser to see the result.
 
 ## How to Use 🦘
 
