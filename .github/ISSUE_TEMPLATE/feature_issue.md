@@ -7,7 +7,7 @@ about: Here, I would provide a summary of the feature.
 - One possible implementation is...
 
 ## Relevant User Stories (if applicable)
-- As a `<>`, I want `<>`so that `<>`.
+- As a `<>`, I want `<feature>`so that `<>`.
 
 ## Acceptance Criteria (Key Requirements)
 - [ ] Feature includes...
