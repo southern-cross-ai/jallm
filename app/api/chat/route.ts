@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 
 // Initialize your custom OpenAI client
 const client = new OpenAI({
-  baseURL: "http://13.239.88.166:8000/v1",
+  baseURL: "EMPTY",
   apiKey: "EMPTY"
 });
 
@@ -64,3 +64,4 @@ At least once, add a random exclamation that is Australian slang or a cultural r
     );
   }
 }
+
