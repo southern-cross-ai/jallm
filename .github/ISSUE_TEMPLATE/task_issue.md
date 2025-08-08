@@ -7,7 +7,7 @@ about: Here, I would provide a summary of the task.
 - One possible implementation is...
 
 ## Relevant User Stories (if applicable)
-- As a `<user role>`, I want `<feature>` so that `<benefit>`.
+- As a `<user role>`, I want `<task to be done>` so that `<benefit>`.
 
 
 ## Acceptance Criteria (Key Requirements)
