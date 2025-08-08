@@ -1,5 +1,5 @@
 # 🩴 - Haikus by Joey
-
+## by j-sawn/32299223
 This is a demonstration of Southern Cross AI's large language model JoeyLLM.  Specifically, this demonstration allows you ask JoeyLLM to write you a haiku of your choosing.
 
 ## Basic Setup (from Vercel) 🌿
